@@ -709,6 +709,7 @@ body.js-anim .reveal.is-visible {
 .d3 { --reveal-delay: 0.27s; }
 .d4 { --reveal-delay: 0.36s; }
 .d5 { --reveal-delay: 0.45s; }
+.d5 { --reveal-delay: 0.54s; }
 
 /* ---------- Motion: nav on scroll ---------- */
 
