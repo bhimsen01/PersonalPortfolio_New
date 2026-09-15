@@ -697,12 +697,6 @@ section {
   border-radius: 3px;
 }
 
-.tag-cloud li[data-level="learning"] {
-  color: var(--fg-muted);
-  border-style: dashed;
-}
-
-
 .contact {
   padding-bottom: var(--section-gap);
 }
