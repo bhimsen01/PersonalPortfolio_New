@@ -9,6 +9,9 @@
   (() => {
     const theme = localStorage.getItem('theme');
     if (theme === 'dark') document.documentElement.classList.add('dark');
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.documentElement.classList.add('preload');
+    }
   })();
 </script>
 
@@ -27,7 +30,6 @@
       <li><a href="#work">Work</a></li>
       <li><a href="#architecture">Architecture</a></li>
       <li><a href="#skills">Skills</a></li>
-      <li><a href="#education">Education</a></li>
       <li><a href="#contact">Contact</a></li>
     </ul>
     <div style="display:flex; align-items:center;">
@@ -46,10 +48,15 @@
   <header class="hero">
     <div class="wrap">
       <p class="hero-kicker reveal d0">Backend Engineer</p>
-      <h1 class="reveal d1">Systems that hold up under real data.</h1>
-      <p class="hero-lede reveal d2">I design and build backend systems — Java &amp; Spring Boot services backed by PostgreSQL, from single-deployable monoliths to service-oriented architectures, with the transactional logic often pushed down into the database itself.</p>
+      <h1 class="reveal d1">Systems rarely seen, yet everything depends on them.</h1>
+      <p class="hero-lede reveal d2">I design and build backend systems — Java & Spring Boot services backed by PostgreSQL, from single-deployable monoliths to service-oriented architectures, with the transactional logic often pushed down into the database itself.</p>
 
-      <div class="status-row reveal d3">
+      <p class="hero-experience reveal d3">
+        <span class="exp-dot" aria-hidden="true"></span>
+        Working as a professional Backend Developer since <time datetime="2026-02">February 2026</time>
+      </p>
+
+      <div class="status-row reveal d4">
         <div><span class="status-dot"></span>Open to backend roles</div>
         <div>Based in Nepal (GMT+5:45)</div>
         <div>Java · Spring Boot · PostgreSQL</div>
@@ -66,7 +73,7 @@
       </div>
       <div class="about-grid">
         <div class="about-copy reveal">
-          <p>I am a backend developer studying for a B.Sc (Hons) in IT, working mainly in the Java / Spring Boot / PostgreSQL stack. Most of what I build sits behind the interface most people see — authentication and account security, payment verification flows, notification systems, and the data model that has to stay correct no matter how the application on top of it changes.</p>
+          <p>I am a backend developer working mainly in the Java / Spring Boot / PostgreSQL stack. Most of what I build sits behind the interface most people see — authentication and account security, payment verification flows, notification systems, and the data model that has to stay correct no matter how the application on top of it changes.</p>
           <p>I have worked across both ends of the architecture spectrum: tightly-scoped monolithic applications where a single deployable is the right call, and service-oriented systems where independent scaling and deployment matter more. I also spend a fair amount of time writing logic directly into PostgreSQL — stored procedures and transactional queries — when correctness or performance needs to live at the database layer rather than the application layer.</p>
         </div>
         <div class="fact-list reveal d1">
@@ -89,64 +96,74 @@
       <div class="section-head reveal">
         <span class="section-index">02</span>
         <h2>How I build</h2>
-        <span class="section-note">three approaches, chosen by fit</span>
+        <span class="section-note">three architectures</span>
       </div>
       <p class="lede reveal" style="margin-bottom:2.5rem;">The right architecture depends on the project, not on which one is more impressive. Here's what I reach for and why.</p>
 
-      <div class="arch-grid">
+      <div class="approach-switch reveal">
 
-        <!-- Monolith -->
-        <div class="arch-panel reveal d0">
-          <svg class="arch-diagram" viewBox="0 0 220 130" aria-hidden="true">
-            <rect class="filled" x="30" y="10" width="160" height="110" rx="2"/>
-            <rect x="46" y="26" width="128" height="22" rx="1"/>
-            <text x="110" y="40" text-anchor="middle">controller</text>
-            <rect x="46" y="56" width="128" height="22" rx="1"/>
-            <text x="110" y="70" text-anchor="middle">service</text>
-            <rect class="accent" x="46" y="86" width="128" height="22" rx="1"/>
-            <text x="110" y="100" text-anchor="middle">repository</text>
-          </svg>
-          <span class="arch-tag">Single deployable</span>
-          <h3>Monolithic systems</h3>
-          <p>One codebase, one deployment, layered cleanly — controller down to repository. This is my default for internal tools and systems with a single team and a bounded domain: it's faster to build, easier to reason about, and there's nothing to orchestrate between services.</p>
+        <div class="approach-tabs" role="tablist" aria-label="Architecture approaches">
+          <span class="approach-thumb" id="approachThumb" aria-hidden="true"></span>
+          <button class="approach-tab" role="tab" id="tab-mono" aria-selected="true" aria-controls="pane-mono" type="button">Monolithic</button>
+          <button class="approach-tab" role="tab" id="tab-micro" aria-selected="false" aria-controls="pane-micro" type="button" tabindex="-1">Microservices</button>
+          <button class="approach-tab" role="tab" id="tab-proc" aria-selected="false" aria-controls="pane-proc" type="button" tabindex="-1">Stored procedures</button>
         </div>
 
-        <!-- Microservices -->
-        <div class="arch-panel reveal d1">
-          <svg class="arch-diagram" viewBox="0 0 220 130" aria-hidden="true">
-            <rect class="accent" x="88" y="8" width="44" height="20" rx="1"/>
-            <text x="110" y="21" text-anchor="middle">gateway</text>
-            <rect class="filled" x="20" y="70" width="52" height="40" rx="1"/>
-            <text x="46" y="93" text-anchor="middle">users</text>
-            <rect class="filled" x="84" y="70" width="52" height="40" rx="1"/>
-            <text x="110" y="93" text-anchor="middle">orders</text>
-            <rect class="filled" x="148" y="70" width="52" height="40" rx="1"/>
-            <text x="174" y="93" text-anchor="middle">notifications</text>
-            <path class="connector" d="M100 28 L46 70"/>
-            <path class="connector" d="M110 28 L110 70"/>
-            <path class="connector" d="M120 28 L174 70"/>
-          </svg>
-          <span class="arch-tag">Independent services</span>
-          <h3>Microservices</h3>
-          <p>Bounded services behind a gateway, each independently deployable and scalable. I use this when parts of a system genuinely need to scale or fail independently — a notification service under bursty load shouldn't affect order processing.</p>
-        </div>
+        <div class="approach-panes">
 
-        <!-- Stored procedures -->
-        <div class="arch-panel reveal d2">
-          <svg class="arch-diagram" viewBox="0 0 220 130" aria-hidden="true">
-            <rect x="30" y="14" width="160" height="30" rx="1"/>
-            <text x="110" y="32" text-anchor="middle">application layer</text>
-            <path class="connector" d="M110 44 L110 60"/>
-            <rect class="accent filled" x="50" y="60" width="120" height="56" rx="4"/>
-            <text x="110" y="82" text-anchor="middle">PL/pgSQL</text>
-            <text x="110" y="96" text-anchor="middle">procedure</text>
-            <text x="110" y="110" text-anchor="middle">— transactional —</text>
-          </svg>
-          <span class="arch-tag">Database-level logic</span>
-          <h3>Stored procedures</h3>
-          <p>For paths where correctness under concurrency matters more than convenience, I push logic into PostgreSQL directly — procedures that run atomically inside a transaction rather than being coordinated from the application layer, cutting round-trips and race conditions.</p>
-        </div>
+          <!-- Monolith -->
+          <div class="arch-panel is-active" id="pane-mono" role="tabpanel" aria-labelledby="tab-mono">
+            <svg class="arch-diagram" viewBox="0 0 220 130" aria-hidden="true">
+              <rect class="filled" x="30" y="10" width="160" height="110" rx="2"/>
+              <rect x="46" y="26" width="128" height="22" rx="1"/>
+              <text x="110" y="40" text-anchor="middle">controller</text>
+              <rect x="46" y="56" width="128" height="22" rx="1"/>
+              <text x="110" y="70" text-anchor="middle">service</text>
+              <rect class="accent" x="46" y="86" width="128" height="22" rx="1"/>
+              <text x="110" y="100" text-anchor="middle">repository</text>
+            </svg>
+            <span class="arch-tag">Single deployable</span>
+            <h3>Monolithic systems</h3>
+            <p>One codebase, one deployment, layered cleanly — controller down to repository. This is my default for internal tools and systems with a single team and a bounded domain: it's faster to build, easier to reason about, and there's nothing to orchestrate between services.</p>
+          </div>
 
+          <!-- Microservices -->
+          <div class="arch-panel" id="pane-micro" role="tabpanel" aria-labelledby="tab-micro" hidden>
+            <svg class="arch-diagram" viewBox="0 0 220 130" aria-hidden="true">
+              <rect class="accent" x="88" y="8" width="44" height="20" rx="1"/>
+              <text x="110" y="21" text-anchor="middle">gateway</text>
+              <rect class="filled" x="20" y="70" width="52" height="40" rx="1"/>
+              <text x="46" y="93" text-anchor="middle">users</text>
+              <rect class="filled" x="84" y="70" width="52" height="40" rx="1"/>
+              <text x="110" y="93" text-anchor="middle">orders</text>
+              <rect class="filled" x="148" y="70" width="52" height="40" rx="1"/>
+              <text x="174" y="93" text-anchor="middle">notifications</text>
+              <path class="connector" d="M100 28 L46 70"/>
+              <path class="connector" d="M110 28 L110 70"/>
+              <path class="connector" d="M120 28 L174 70"/>
+            </svg>
+            <span class="arch-tag">Independent services</span>
+            <h3>Microservices</h3>
+            <p>Bounded services behind a gateway, each independently deployable and scalable. I use this when parts of a system genuinely need to scale or fail independently — a notification service under bursty load shouldn't affect order processing.</p>
+          </div>
+
+          <!-- Stored procedures -->
+          <div class="arch-panel" id="pane-proc" role="tabpanel" aria-labelledby="tab-proc" hidden>
+            <svg class="arch-diagram" viewBox="0 0 220 130" aria-hidden="true">
+              <rect x="30" y="14" width="160" height="30" rx="1"/>
+              <text x="110" y="32" text-anchor="middle">application layer</text>
+              <path class="connector" d="M110 44 L110 60"/>
+              <rect class="accent filled" x="50" y="60" width="120" height="56" rx="4"/>
+              <text x="110" y="82" text-anchor="middle">PL/pgSQL</text>
+              <text x="110" y="96" text-anchor="middle">procedure</text>
+              <text x="110" y="110" text-anchor="middle">— transactional —</text>
+            </svg>
+            <span class="arch-tag">Database-level logic</span>
+            <h3>Stored procedures</h3>
+            <p>For paths where correctness under concurrency matters more than convenience, I push logic into PostgreSQL directly — procedures that run atomically inside a transaction rather than being coordinated from the application layer, cutting round-trips and race conditions.</p>
+          </div>
+
+        </div>
       </div>
     </div>
   </section>
@@ -159,61 +176,81 @@
         <h2>Selected work</h2>
       </div>
 
-      <div class="work-list">
+      <div class="work-list" id="workList">
 
-        <div class="work-row reveal d0">
-          <div class="work-meta">2026<br>Live</div>
-          <div>
-            <h3>ESuchana — government eservice system, serving 4 municipalities</h3>
-            <p>Government e-service platform consolidating citizen, municipal, and ward-level services, including citizen charter and budget information, government forms, PSC vacancies and applications, complaint management, alerts, and institutional information. Architected stateless JWT authentication with refresh-token rotation, RBAC and PBAC authorization, and secure role-based access across multiple service modules. Developed core government-service workflows and notification systems to provide a unified and scalable digital platform for citizen services.</p>
-            <ul class="stack-tags">
-              <li>Spring Boot</li><li>PostgreSQL</li><li>Spring Security</li><li>WebSocket</li>
-            </ul>
+        <div class="work-entry is-open reveal d0">
+          <div class="work-head">
+            <button class="work-toggle" type="button" aria-expanded="true" aria-controls="work-panel-1">
+              <span class="work-meta">2026<br><span class="live-tag">Live</span></span>
+              <h3>ESuchana — government eservice system, serving 4 municipalities</h3>
+              <span class="work-arrow" aria-hidden="true"></span>
+            </button>
+            <a class="work-visit" href="https://eservice.butwalmun.gov.np/" target="_blank" rel="noopener noreferrer">Visit <span class="arrow">↗</span></a>
           </div>
-          <div class="work-links">
-            <a href="https://eservice.butwalmun.gov.np/" target="_blank" rel="noopener noreferrer">Live site ↗</a>
+          <div class="work-panel" id="work-panel-1">
+            <div class="work-panel-inner">
+              <p>Government e-service platform consolidating citizen, municipal, and ward-level services, including citizen charter and budget information, government forms, PSC vacancies and applications, complaint management, alerts, and institutional information. Architected stateless JWT authentication with refresh-token rotation, RBAC and PBAC authorization, and secure role-based access across multiple service modules. Developed core government-service workflows and notification systems to provide a unified and scalable digital platform for citizen services.</p>
+              <ul class="stack-tags">
+                <li>Spring Boot</li><li>PostgreSQL</li><li>Spring Security</li><li>WebSocket</li>
+              </ul>
+            </div>
           </div>
         </div>
 
-        <div class="work-row reveal d1">
-          <div class="work-meta">2026<br>Live</div>
-          <div>
-            <h3>Elevate — integrated LMS &amp; HR system</h3>
-            <p>Backend for a combined learning-management and HR platform, built on Spring Boot and PostgreSQL with a Next.js frontend.</p>
-            <ul class="stack-tags">
-              <li>Spring Boot</li><li>PostgreSQL</li><li>Next.js</li>
-            </ul>
+        <div class="work-entry reveal d1">
+          <div class="work-head">
+            <button class="work-toggle" type="button" aria-expanded="false" aria-controls="work-panel-2">
+              <span class="work-meta">2026<br><span class="live-tag">Live</span></span>
+              <h3>Elevate — integrated LMS & HR system</h3>
+              <span class="work-arrow" aria-hidden="true"></span>
+            </button>
+            <a class="work-visit" href="#" target="_blank" rel="noopener noreferrer">Visit <span class="arrow">↗</span></a>
           </div>
-          <div class="work-links">
-            <a href="#" target="_blank" rel="noopener noreferrer">Live site ↗</a>
-          </div>
-        </div>
-
-        <div class="work-row reveal d2">
-          <div class="work-meta">2026<br>Live</div>
-          <div>
-            <h3>MSP Hiring — hiring platform</h3>
-            <p>Backend for a hiring platform: job postings, applications, and candidate management.</p>
-            <ul class="stack-tags">
-              <li>Spring Boot</li><li>PostgreSQL</li>
-            </ul>
-          </div>
-          <div class="work-links">
-            <a href="https://msp-hiring.mspsolution.com.np/" target="_blank" rel="noopener noreferrer">Live site ↗</a>
+          <div class="work-panel" id="work-panel-2">
+            <div class="work-panel-inner">
+              <p>Backend for a combined learning-management and HR platform, built on Spring Boot and PostgreSQL with a Next.js frontend.</p>
+              <ul class="stack-tags">
+                <li>Spring Boot</li><li>PostgreSQL</li><li>Next.js</li>
+              </ul>
+            </div>
           </div>
         </div>
 
-        <div class="work-row reveal d4">
-          <div class="work-meta">2025</div>
-          <div>
-            <h3>DeadDrop — credit-based task platform</h3>
-            <p>Task-management platform built directly on Core Java, JDBC and Servlet/JSP — no ORM, hand-written SQL and session handling.</p>
-            <ul class="stack-tags">
-              <li>Java</li><li>JDBC</li><li>Servlet</li><li>JSP</li>
-            </ul>
+        <div class="work-entry reveal d2">
+          <div class="work-head">
+            <button class="work-toggle" type="button" aria-expanded="false" aria-controls="work-panel-3">
+              <span class="work-meta">2026<br><span class="live-tag">Live</span></span>
+              <h3>MSP Hiring — hiring platform</h3>
+              <span class="work-arrow" aria-hidden="true"></span>
+            </button>
+            <a class="work-visit" href="https://msp-hiring.mspsolution.com.np/" target="_blank" rel="noopener noreferrer">Visit <span class="arrow">↗</span></a>
           </div>
-          <div class="work-links">
-            <a href="https://github.com/bhimsen01/DeadDrop" target="_blank" rel="noopener noreferrer">Repository ↗</a>
+          <div class="work-panel" id="work-panel-3">
+            <div class="work-panel-inner">
+              <p>Backend for a hiring platform: job postings, applications, and candidate management.</p>
+              <ul class="stack-tags">
+                <li>Spring Boot</li><li>PostgreSQL</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="work-entry reveal d3">
+          <div class="work-head">
+            <button class="work-toggle" type="button" aria-expanded="false" aria-controls="work-panel-4">
+              <span class="work-meta">2025</span>
+              <h3>DeadDrop — credit-based task platform</h3>
+              <span class="work-arrow" aria-hidden="true"></span>
+            </button>
+            <a class="work-visit" href="https://github.com/bhimsen01/DeadDrop" target="_blank" rel="noopener noreferrer">Code <span class="arrow">↗</span></a>
+          </div>
+          <div class="work-panel" id="work-panel-4">
+            <div class="work-panel-inner">
+              <p>Task-management platform built directly on Core Java, JDBC and Servlet/JSP — no ORM, hand-written SQL and session handling.</p>
+              <ul class="stack-tags">
+                <li>Java</li><li>JDBC</li><li>Servlet</li><li>JSP</li>
+              </ul>
+            </div>
           </div>
         </div>
 
@@ -245,7 +282,7 @@
         <div class="skill-group reveal d2">
           <h4>Database</h4>
           <ul class="tag-cloud">
-            <li>PostgreSQL</li><li>PL/pgSQL &amp; stored procedures</li><li>MySQL</li><li>MS SQL</li><li>MongoDB</li>
+            <li>PostgreSQL</li><li>PL/pgSQL & stored procedures</li><li>MySQL</li><li>MS SQL</li><li>MongoDB</li>
           </ul>
         </div>
         <div class="skill-group reveal d3">
@@ -255,13 +292,13 @@
           </ul>
         </div>
         <div class="skill-group reveal d4">
-          <h4>Development &amp; workflow</h4>
+          <h4>Development & workflow</h4>
           <ul class="tag-cloud">
             <li>Git</li><li>GitHub</li><li>Docker</li><li>Postman</li>
           </ul>
         </div>
         <div class="skill-group reveal d5">
-          <h4>Design &amp; 3D</h4>
+          <h4>Design & 3D</h4>
           <ul class="tag-cloud">
             <li>Figma</li><li>Blender</li>
           </ul>
@@ -271,25 +308,6 @@
           <ul class="tag-cloud">
             <li data-level="learning">Kubernetes</li><li data-level="learning">AWS</li>
           </ul>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ EDUCATION ============ -->
-  <section id="education">
-    <div class="wrap">
-      <div class="section-head reveal">
-        <span class="section-index">05</span>
-        <h2>Education</h2>
-      </div>
-      <div class="timeline">
-        <div class="timeline-row reveal d0">
-          <div class="t-date">Sep 2024 — Sep 2027</div>
-          <div>
-            <h3>B.Sc (Hons) Information Technology</h3>
-            <p>Techspire College - Kathmanud, Nepal</p>
-          </div>
         </div>
       </div>
     </div>

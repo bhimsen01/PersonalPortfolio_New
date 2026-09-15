@@ -2,7 +2,12 @@
   const root = document.documentElement;
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* ---------- Theme toggle ---------- */
+  if (root.classList.contains('preload')) {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => root.classList.remove('preload'));
+    });
+  }
+
   const toggle = document.getElementById('themeToggle');
 
   function syncTheme() {
@@ -16,23 +21,23 @@
     syncTheme();
   });
 
-  /* ---------- Mobile nav ---------- */
   const navToggle = document.getElementById('navToggle');
   const navLinks = document.getElementById('navLinks');
 
   navToggle.addEventListener('click', () => {
     const open = navLinks.classList.toggle('is-open');
     navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    navToggle.setAttribute('aria-label', open ? 'Close menu' : 'Toggle menu');
   });
 
   navLinks.querySelectorAll('a').forEach(link => {
     link.addEventListener('click', () => {
       navLinks.classList.remove('is-open');
       navToggle.setAttribute('aria-expanded', 'false');
+      navToggle.setAttribute('aria-label', 'Toggle menu');
     });
   });
 
-  /* ---------- Nav scroll state ---------- */
   const siteNav = document.querySelector('.site-nav');
   function onNavScroll() {
     siteNav.classList.toggle('is-scrolled', window.scrollY > 8);
@@ -40,19 +45,14 @@
   onNavScroll();
   window.addEventListener('scroll', onNavScroll, { passive: true });
 
-  if (reduceMotion) return; // everything below is decorative motion only
-
-  root.classList.add('js-anim');
-
-  /* ---------- Architecture diagram line-draw ---------- */
   function primeConnectors(svg) {
     svg.querySelectorAll('path.connector').forEach(p => {
       const len = Math.ceil(p.getTotalLength());
       p.style.transition = 'none';
       p.style.strokeDasharray = len;
       p.style.strokeDashoffset = len;
-      p.getBoundingClientRect(); // force the browser to commit the instant state
-      p.style.transition = '';   // re-enable the CSS transition for the draw-in
+      p.getBoundingClientRect();
+      p.style.transition = '';
     });
   }
   function drawConnectors(svg) {
@@ -60,40 +60,122 @@
       p.style.strokeDashoffset = '0';
     });
   }
-  document.querySelectorAll('.arch-diagram').forEach(primeConnectors);
+  if (!reduceMotion) {
+    document.querySelectorAll('.arch-panel:not([hidden]) .arch-diagram').forEach(primeConnectors);
+  }
 
-  /* ---------- Scroll reveals ---------- */
+  const tabs = Array.from(document.querySelectorAll('.approach-tab'));
+  const thumb = document.getElementById('approachThumb');
+
+  function placeThumb(tab) {
+    if (!thumb || !tab) return;
+    thumb.style.width = tab.offsetWidth + 'px';
+    thumb.style.transform = `translateX(${tab.offsetLeft}px)`;
+  }
+
+  function selectTab(tab) {
+    tabs.forEach(t => {
+      const active = t === tab;
+      t.setAttribute('aria-selected', String(active));
+      t.tabIndex = active ? 0 : -1;
+      const pane = document.getElementById(t.getAttribute('aria-controls'));
+      if (!pane) return;
+      if (active) {
+        pane.hidden = false;
+        pane.classList.add('is-active');
+        if (!reduceMotion) {
+          primeConnectors(pane);
+          requestAnimationFrame(() => drawConnectors(pane));
+        }
+      } else {
+        pane.hidden = true;
+        pane.classList.remove('is-active');
+      }
+    });
+    placeThumb(tab);
+  }
+
+  tabs.forEach((tab, i) => {
+    tab.addEventListener('click', () => selectTab(tab));
+    tab.addEventListener('keydown', e => {
+      const dir = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+      if (dir) {
+        e.preventDefault();
+        const next = tabs[(i + dir + tabs.length) % tabs.length];
+        next.focus();
+        selectTab(next);
+      }
+    });
+  });
+
+  if (tabs.length) {
+    const initial = tabs.find(t => t.getAttribute('aria-selected') === 'true') || tabs[0];
+    placeThumb(initial);
+    window.addEventListener('resize', () => {
+      const current = tabs.find(t => t.getAttribute('aria-selected') === 'true');
+      placeThumb(current);
+    }, { passive: true });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => placeThumb(initial));
+  }
+
+  document.querySelectorAll('.work-entry').forEach(entry => {
+    const btn = entry.querySelector('.work-toggle');
+    btn.addEventListener('click', () => {
+      const open = !entry.classList.contains('is-open');
+      entry.classList.toggle('is-open', open);
+      btn.setAttribute('aria-expanded', String(open));
+    });
+  });
+
   const revealEls = document.querySelectorAll('.reveal');
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
+      entry.target.classList.toggle('is-visible', entry.isIntersecting);
       if (entry.isIntersecting) {
-        entry.target.classList.add('is-visible');
         const svg = entry.target.querySelector('.arch-diagram');
         if (svg) drawConnectors(svg);
-        observer.unobserve(entry.target);
       }
     });
   }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
 
   revealEls.forEach(el => observer.observe(el));
 
-  /* ---------- Hero parallax (single orchestrated moment) ---------- */
-  const heroWrap = document.querySelector('.hero .wrap');
-  let ticking = false;
+  if (reduceMotion) return;
+
+  document.body.classList.add('js-anim');
+
+  const heroLayers = [
+    { el: document.querySelector('.hero-kicker'),     rate: 0.10 },
+    { el: document.querySelector('.hero h1'),         rate: 0.16 },
+    { el: document.querySelector('.hero-lede'),       rate: 0.22 },
+    { el: document.querySelector('.hero-experience'), rate: 0.28 },
+    { el: document.querySelector('.status-row'),      rate: 0.34 },
+  ].filter(l => l.el);
+
+  const heroSection = document.querySelector('.hero');
+  let parallaxTicking = false;
 
   function updateHeroParallax() {
-    const y = window.scrollY;
-    const fade = Math.max(0, 1 - y / 480);
-    const shift = Math.min(y * 0.12, 55);
-    heroWrap.style.transform = `translateY(${shift}px)`;
-    heroWrap.style.opacity = fade;
-    ticking = false;
+    parallaxTicking = false;
+    if (!heroSection) return;
+    const rect = heroSection.getBoundingClientRect();
+    if (rect.bottom <= 0 || rect.top >= window.innerHeight) return; // out of view, do nothing
+    const y = Math.max(0, -rect.top);
+    heroLayers.forEach(({ el, rate }) => {
+      el.style.transform = `translate3d(0, ${(-y * rate).toFixed(1)}px, 0)`;
+    });
   }
 
-  window.addEventListener('scroll', () => {
-    if (!ticking) {
-      requestAnimationFrame(updateHeroParallax);
-      ticking = true;
-    }
-  }, { passive: true });
+  if (heroLayers.length) {
+    window.setTimeout(() => {
+      heroLayers.forEach(({ el }) => { el.style.transitionProperty = 'opacity'; });
+      updateHeroParallax();
+      window.addEventListener('scroll', () => {
+        if (!parallaxTicking) {
+          parallaxTicking = true;
+          requestAnimationFrame(updateHeroParallax);
+        }
+      }, { passive: true });
+    }, 900);
+  }
 })();
